@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,8 +8,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Allura&family=Lato:wght@400;700&display=swap" rel="stylesheet"/>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-  <!-- ADDED: QR code library -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     body{background:#d8dfe8;font-family:Lato,sans-serif;display:flex;flex-direction:column;align-items:center;padding:30px 16px 60px;min-height:100vh}
@@ -407,43 +406,6 @@ function rebuildSelect(){
   });
 }
 
-/* ── ADDED: generates a QR canvas from the enrollment number ── */
-function generateQRCanvas(enroll, size) {
-  return new Promise(function(resolve) {
-    if (!enroll) { resolve(null); return; }
-    var wrapper = document.createElement('div');
-    wrapper.style.cssText = 'position:absolute;left:-9999px;top:-9999px;visibility:hidden';
-    document.body.appendChild(wrapper);
-    try {
-      new QRCode(wrapper, {
-        text: enroll,
-        width: size,
-        height: size,
-        colorDark: '#1a2a4a',
-        colorLight: '#ffffff',
-        correctLevel: QRCode.CorrectLevel.M
-      });
-      setTimeout(function() {
-        var qc = wrapper.querySelector('canvas');
-        var out = document.createElement('canvas');
-        out.width = size; out.height = size;
-        if (qc) {
-          out.getContext('2d').drawImage(qc, 0, 0);
-        } else {
-          var qi = wrapper.querySelector('img');
-          if (qi) out.getContext('2d').drawImage(qi, 0, 0, size, size);
-        }
-        document.body.removeChild(wrapper);
-        resolve(out);
-      }, 80);
-    } catch(e) {
-      try { document.body.removeChild(wrapper); } catch(e2) {}
-      resolve(null);
-    }
-  });
-}
-/* ── END ADDED ── */
-
 function drawCert(canvas, name, enroll){
   var tpl = TEMPLATES[activeTPL];
   var img = imgs[activeTPL];
@@ -486,20 +448,6 @@ function drawCert(canvas, name, enroll){
         ctx.fillText(enroll, cx, cy + 60);
         ctx.restore();
       }
-
-  /* ── ADDED: stamp QR code (bottom-right corner) keyed to enrollment number ── */
-  return generateQRCanvas(enroll, 300).then(function(qrCanvas) {
-    if (!qrCanvas) return;
-    var pad = 310;
-    var qrX = W - 300 - pad;
-    var qrY = H - 300 - pad;
-    ctx.save();
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(qrX - 12, qrY - 12, 324, 324);
-    ctx.drawImage(qrCanvas, qrX, qrY, 300, 300);
-    ctx.restore();
-  });
-  /* ── END ADDED ── */
 }
 
 function canvasToBlob(c){ return new Promise(function(res){ c.toBlob(function(b){ res(b); },'image/jpeg',0.95); }); }
@@ -525,8 +473,8 @@ async function downloadAllZip(){
   var off = document.createElement('canvas');
   for(var i=0; i<students.length; i++){
     var d = students[i];
-    await drawCert(off, d.name, d.enroll);
-    await drawCert(document.getElementById('preview'), d.name, d.enroll);
+    drawCert(off, d.name, d.enroll);
+    drawCert(document.getElementById('preview'), d.name, d.enroll);
     document.getElementById('previewLabel').style.display = 'block';
     var blob = await canvasToBlob(off);
     folder.file(safeName(d.enroll||d.name)+'.jpeg', await blob.arrayBuffer());
@@ -548,15 +496,15 @@ function downloadOneByOne(){
   showProgress();
   var off = document.createElement('canvas');
   var idx = 0;
-  async function next(){
+  function next(){
     if(idx >= students.length){
       setStatus('Done! '+students.length+' downloaded.');
       setAllBtnsDisabled(false);
       return;
     }
     var d = students[idx];
-    await drawCert(off, d.name, d.enroll);
-    await drawCert(document.getElementById('preview'), d.name, d.enroll);
+    drawCert(off, d.name, d.enroll);
+    drawCert(document.getElementById('preview'), d.name, d.enroll);
     document.getElementById('previewLabel').style.display = 'block';
     off.toBlob(function(blob){
       triggerDownload(blob, safeName(d.enroll||d.name)+'.jpeg');
