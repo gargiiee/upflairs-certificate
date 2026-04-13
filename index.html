@@ -503,7 +503,7 @@ function drawCert(canvas, name, regNo, enroll){
     var boxH  = rfs * regBoxHMul;
     var ry    = H * (regYPct/100);
     // border only — no background fill
-    ctx.strokeStyle = '#aaaaaa';
+    ctx.strokeStyle = '#1b2e50';
     ctx.lineWidth   = Math.max(1, regBorderPx * (W / 800));
     ctx.strokeRect(cx - boxW/2, ry - boxH/2, boxW, boxH);
     // text
@@ -519,7 +519,7 @@ function drawCert(canvas, name, regNo, enroll){
   if(enroll){
     ctx.save();
     var efs     = Math.round(W * (regFsPct/100));
-    var lineGap = efs * 1.55;
+    var lineGap = efs * 1.00;
     var ey      = H * (enrYPct/100);
     var eBoxW   = W * 0.30;
     var eBoxH   = lineGap * 2.2;
