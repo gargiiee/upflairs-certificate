@@ -129,7 +129,7 @@
   <label class="upload-area" for="xlFile">
     <div class="icon">&#128202;</div>
     <strong>Click to upload Excel file (.xlsx / .xls)</strong>
-    <p>Required columns: Name &nbsp;|&nbsp; Enrollment Number</p>
+    <p>Required columns: Name &nbsp;|&nbsp; Registration No. &nbsp;|&nbsp; Enrollment Number</p>
   </label>
   <input type="file" id="xlFile" accept=".xlsx,.xls" onchange="loadExcel(event)"/>
 
@@ -150,12 +150,56 @@
     </div>
     <div class="table-wrap">
       <table>
-        <thead><tr><th>#</th><th>Full Name</th><th>Enrollment Number</th></tr></thead>
+        <thead><tr><th>#</th><th>Full Name</th><th>Registration No.</th><th>Enrollment Number</th></tr></thead>
         <tbody id="tableBody"></tbody>
       </table>
     </div>
   </div>
   <div id="noData" class="no-data">&#128196; No Excel file uploaded yet. Upload a file to load student data.</div>
+</div>
+
+<div class="card" id="tunerCard">
+  <h2><span class="step-num" style="background:#f0821e">&#9881;</span> Fine-Tune Text Positions</h2>
+  <p style="font-size:.82rem;color:#667;margin-bottom:14px">Adjust sliders, then click <strong>Preview</strong> to see changes live. Values are % of certificate height/width.</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;flex-wrap:wrap">
+    <div>
+      <label style="font-size:.8rem;font-weight:700;color:#1a2a4a;display:block;margin-bottom:4px">&#9997; Name Y position: <span id="nameYVal">38</span>%</label>
+      <input type="range" min="25" max="60" value="38" step="0.5" oninput="nameYPct=+this.value;document.getElementById('nameYVal').textContent=this.value;livePreview()" style="width:100%">
+    </div>
+    <div>
+      <label style="font-size:.8rem;font-weight:700;color:#1a2a4a;display:block;margin-bottom:4px">&#127986; Reg No Y position: <span id="regYVal">46</span>%</label>
+      <input type="range" min="30" max="65" value="46" step="0.5" oninput="regYPct=+this.value;document.getElementById('regYVal').textContent=this.value;livePreview()" style="width:100%">
+    </div>
+    <div>
+      <label style="font-size:.8rem;font-weight:700;color:#1a2a4a;display:block;margin-bottom:4px">&#128196; Enrollment Y position: <span id="enrYVal">82</span>%</label>
+      <input type="range" min="60" max="95" value="82" step="0.5" oninput="enrYPct=+this.value;document.getElementById('enrYVal').textContent=this.value;livePreview()" style="width:100%">
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:14px">
+    <div>
+      <label style="font-size:.8rem;font-weight:700;color:#1a2a4a;display:block;margin-bottom:4px">Name font size: <span id="nameFsVal">7.5</span>% of width</label>
+      <input type="range" min="3" max="12" value="7.5" step="0.1" oninput="nameFsPct=+this.value;document.getElementById('nameFsVal').textContent=this.value;livePreview()" style="width:100%">
+    </div>
+    <div>
+      <label style="font-size:.8rem;font-weight:700;color:#1a2a4a;display:block;margin-bottom:4px">Reg/Enroll font size: <span id="regFsVal">2.6</span>% of width</label>
+      <input type="range" min="1" max="5" value="2.6" step="0.1" oninput="regFsPct=+this.value;document.getElementById('regFsVal').textContent=this.value;livePreview()" style="width:100%">
+    </div>
+  </div>
+  <p style="font-size:.78rem;font-weight:700;color:#f0821e;margin:14px 0 10px">&#9645; Registration No. Border</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px">
+    <div>
+      <label style="font-size:.8rem;font-weight:700;color:#1a2a4a;display:block;margin-bottom:4px">Border thickness: <span id="borderVal">1</span>px</label>
+      <input type="range" min="1" max="15" value="1" step="1" oninput="regBorderPx=+this.value;document.getElementById('borderVal').textContent=this.value;livePreview()" style="width:100%">
+    </div>
+    <div>
+      <label style="font-size:.8rem;font-weight:700;color:#1a2a4a;display:block;margin-bottom:4px">Box width: <span id="boxWVal">36</span>% of cert</label>
+      <input type="range" min="10" max="70" value="36" step="1" oninput="regBoxWPct=+this.value;document.getElementById('boxWVal').textContent=this.value;livePreview()" style="width:100%">
+    </div>
+    <div>
+      <label style="font-size:.8rem;font-weight:700;color:#1a2a4a;display:block;margin-bottom:4px">Box height: <span id="boxHVal">2.2</span>x font</label>
+      <input type="range" min="1.2" max="4.0" value="2.2" step="0.1" oninput="regBoxHMul=+this.value;document.getElementById('boxHVal').textContent=this.value;livePreview()" style="width:100%">
+    </div>
+  </div>
 </div>
 
 <div class="card">
@@ -194,11 +238,19 @@
 
 <script>
 var TEMPLATES = [
-  { src: 'lietdevps.png', nameY: 610, nameSize: 110, enrollY: 1285, builtin: true },
+  { src: 'lnjpit.jpeg', nameY: 610, nameSize: 110, enrollY: 1285, builtin: true },
   { src: '1_Ms__Krishna_Khangarot.png', nameY: 600, nameSize: 100, enrollY: 1275, builtin: true },
   { src: 'lietdevps.png', nameY: 600, nameSize: 100, enrollY: 1275, builtin: true }
 ];
 
+var nameYPct  = 38;   // % of H
+var regYPct   = 46;   // % of H
+var enrYPct   = 82;   // % of H
+var nameFsPct = 7.5;  // % of W
+var regFsPct  = 2.6;  // % of W
+var regBorderPx = 1;    // border thickness in px (actual canvas px, scaled)
+var regBoxWPct  = 36;   // box width % of W
+var regBoxHMul  = 2.2;  // box height = font * this multiplier
 var customTemplateCount = 0;
 var students = [];
 var activeTPL = 0;
@@ -339,20 +391,35 @@ function loadExcel(e){
     var ws = wb.Sheets[wb.SheetNames[0]];
     var rows = XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
     students = [];
-    var headerSkipped = false;
-    rows.forEach(function(r){
-      var col0 = (r[0]||'').toString().trim();
-      var col1 = (r[1]||'').toString().trim();
-      if(!headerSkipped && (col0.toLowerCase()==='name'||col0.toLowerCase()==='sr'||col0.toLowerCase()==='s.no')){
-        headerSkipped=true; return;
+    // Smart column detection — find header row first
+    var nameCol=-1, regCol=-1, enrollCol=-1, dataStart=0;
+    for(var ri=0; ri<Math.min(5,rows.length); ri++){
+      var r0 = rows[ri];
+      for(var ci=0; ci<r0.length; ci++){
+        var h = (r0[ci]||'').toString().trim().toLowerCase();
+        if(h==='name'||h==='full name'||h==='student name') nameCol=ci;
+        if(h.indexOf('reg')!==-1) regCol=ci;
+        if(h.indexOf('enroll')!==-1||h.indexOf('enr')!==-1) enrollCol=ci;
       }
-      if(!isNaN(col0) && col0!==''){
-        var nm = (r[1]||'').toString().trim();
-        var enr = (r[2]||'').toString().trim();
-        if(nm) students.push({name:nm, enroll:enr});
-      } else if(col0 && col0.toLowerCase()!=='name'){
-        students.push({name:col0, enroll:col1});
-      }
+      if(nameCol!==-1){ dataStart=ri+1; break; }
+    }
+    // Fallback column layout: S.No | Name | RegNo | Enrollment
+    if(nameCol===-1){
+      rows.forEach(function(r,ri){
+        var c0=(r[0]||'').toString().trim();
+        if(!isNaN(c0)&&c0!==''){
+          nameCol=1; regCol=2; enrollCol=3; dataStart=ri; return;
+        }
+      });
+    }
+    if(nameCol===-1){ nameCol=0; regCol=1; enrollCol=2; dataStart=0; }
+
+    rows.slice(dataStart).forEach(function(r){
+      var nm=(r[nameCol]||'').toString().trim();
+      if(!nm||nm.toLowerCase()==='name') return;
+      var reg=regCol>=0?(r[regCol]||'').toString().trim():'';
+      var enr=enrollCol>=0?(r[enrollCol]||'').toString().trim():'';
+      students.push({name:nm, regNo:reg, enroll:enr});
     });
 
     document.getElementById('uploadFileName').textContent = file.name;
@@ -386,7 +453,7 @@ function renderTable(){
   var ready=0, empty=0;
   students.forEach(function(d,i){
     var tr = document.createElement('tr');
-    tr.innerHTML = '<td>'+(i+1)+'</td><td>'+d.name+'</td><td>'+(d.enroll||'<em style="color:#c62828">Missing</em>')+'</td>';
+    tr.innerHTML = '<td>'+(i+1)+'</td><td>'+d.name+'</td><td>'+(d.regNo||'<em style="color:#c62828">Missing</em>')+'</td><td>'+(d.enroll||'<em style="color:#c62828">Missing</em>')+'</td>';
     tbody.appendChild(tr);
     if(d.enroll) ready++; else empty++;
   });
@@ -401,53 +468,82 @@ function rebuildSelect(){
   students.forEach(function(d,i){
     var opt = document.createElement('option');
     opt.value = i;
-    opt.textContent = (i+1)+'. '+d.name+(d.enroll?' ('+d.enroll+')':'');
+    opt.textContent = (i+1)+'. '+d.name+(d.regNo?' ['+d.regNo+']':'')+(d.enroll?' ('+d.enroll+')':'');
     sel.appendChild(opt);
   });
 }
 
-function drawCert(canvas, name, enroll){
-  var tpl = TEMPLATES[activeTPL];
+function drawCert(canvas, name, regNo, enroll){
   var img = imgs[activeTPL];
   var ctx = canvas.getContext('2d');
   var W = img.naturalWidth;
   var H = img.naturalHeight;
   canvas.width = W;
   canvas.height = H;
-  ctx.drawImage(img,0,0);
+  ctx.drawImage(img, 0, 0);
+  var cx = W * 0.5;
+
+  // ── NAME ── cursive script, ~38% down
   if(name){
     ctx.save();
-
-    // for name 
-    ctx.font = (tpl.nameSize + 80)+'px Allura, cursive';  
+    var nfs = Math.round(W * (nameFsPct/100));
+    ctx.font = nfs + 'px Allura, cursive';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillStyle = '#1a2a4a';
-    ctx.fillText(name, W*0.5, tpl.nameY + 470);
+    ctx.fillText(name, cx, H * (nameYPct/100));
     ctx.restore();
   }
-  if (enroll) {
-        ctx.save();
-        ctx.font = 'bold 92px Arial, sans-serif';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        var cx = W * 0.5;
-        var cy = tpl.enrollY + 690; // adjust vertical position if needed
 
-        // Draw background box (slightly taller now)
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(cx - 500, cy - 80, 1000, 160);
+  // ── REGISTRATION NO ── thin-bordered box, ~46% down (right below name, above body text)
+  if(regNo){
+    ctx.save();
+    var rfs   = Math.round(W * (regFsPct/100));
+    var boxW  = W * (regBoxWPct/100);
+    var boxH  = rfs * regBoxHMul;
+    var ry    = H * (regYPct/100);
+    // border only — no background fill
+    ctx.strokeStyle = '#aaaaaa';
+    ctx.lineWidth   = Math.max(1, regBorderPx * (W / 800));
+    ctx.strokeRect(cx - boxW/2, ry - boxH/2, boxW, boxH);
+    // text
+    ctx.fillStyle    = '#1a2a4a';
+    ctx.font         = rfs + 'px Arial, sans-serif';
+    ctx.textAlign    = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('Registeration No.: ' + regNo, cx, ry);
+    ctx.restore();
+  }
 
-        // Line 1: Label
-        ctx.fillStyle = '#1a2a4a';
-        ctx.font = 'bold 90px Arial, sans-serif';
-        ctx.fillText('Enrollment No.:', cx, cy - 20);
+  // ── ENROLLMENT NO ── two-line centred block, ~82% down
+  if(enroll){
+    ctx.save();
+    var efs     = Math.round(W * (regFsPct/100));
+    var lineGap = efs * 1.55;
+    var ey      = H * (enrYPct/100);
+    var eBoxW   = W * 0.30;
+    var eBoxH   = lineGap * 2.2;
+    // white bg so it sits cleanly on the cert bottom area
+    ctx.fillStyle = 'rgba(255,255,255,0.0)'; // transparent — text goes over template area
+    ctx.fillRect(cx - eBoxW/2, ey - eBoxH/2, eBoxW, eBoxH);
+    ctx.textAlign    = 'center';
+    ctx.textBaseline = 'middle';
+    // Label line
+    ctx.fillStyle = '#1a2a4a';
+    ctx.font      = 'bold ' + efs + 'px Arial, sans-serif';
+    ctx.fillText('Enrollment No.:', cx, ey - lineGap * 0.5);
+    // Value line
+    ctx.font = efs + 'px Arial, sans-serif';
+    ctx.fillText(enroll, cx, ey + lineGap * 0.5);
+    ctx.restore();
+  }
+}
 
-        // Line 2: Actual Enrollment Number
-        ctx.font = 'bold 90px Arial, sans-serif';
-        ctx.fillText(enroll, cx, cy + 60);
-        ctx.restore();
-      }
+function livePreview(){
+  if(!students.length) return;
+  var d = students[0];
+  drawCert(document.getElementById('preview'), d.name, d.regNo, d.enroll);
+  document.getElementById('previewLabel').style.display = 'block';
 }
 
 function canvasToBlob(c){ return new Promise(function(res){ c.toBlob(function(b){ res(b); },'image/jpeg',0.95); }); }
@@ -473,8 +569,8 @@ async function downloadAllZip(){
   var off = document.createElement('canvas');
   for(var i=0; i<students.length; i++){
     var d = students[i];
-    drawCert(off, d.name, d.enroll);
-    drawCert(document.getElementById('preview'), d.name, d.enroll);
+    drawCert(off, d.name, d.regNo, d.enroll);
+    drawCert(document.getElementById('preview'), d.name, d.regNo, d.enroll);
     document.getElementById('previewLabel').style.display = 'block';
     var blob = await canvasToBlob(off);
     folder.file(safeName(d.enroll||d.name)+'.jpeg', await blob.arrayBuffer());
@@ -503,8 +599,8 @@ function downloadOneByOne(){
       return;
     }
     var d = students[idx];
-    drawCert(off, d.name, d.enroll);
-    drawCert(document.getElementById('preview'), d.name, d.enroll);
+    drawCert(off, d.name, d.regNo, d.enroll);
+    drawCert(document.getElementById('preview'), d.name, d.regNo, d.enroll);
     document.getElementById('previewLabel').style.display = 'block';
     off.toBlob(function(blob){
       triggerDownload(blob, safeName(d.enroll||d.name)+'.jpeg');
@@ -519,7 +615,7 @@ function downloadOneByOne(){
 function previewFirst(){
   if(!students.length){ setStatus('No student data!'); return; }
   var d = students[0];
-  drawCert(document.getElementById('preview'), d.name, d.enroll);
+  drawCert(document.getElementById('preview'), d.name, d.regNo, d.enroll);
   document.getElementById('previewLabel').style.display = 'block';
   document.getElementById('preview').scrollIntoView({behavior:'smooth', block:'center'});
   setStatus('Previewing: '+d.name);
@@ -535,8 +631,8 @@ function downloadSingle(){
   var idx = parseInt(document.getElementById('studentSelect').value);
   var d = students[idx];
   var off = document.createElement('canvas');
-  drawCert(off, d.name, d.enroll);
-  drawCert(document.getElementById('preview'), d.name, d.enroll);
+  drawCert(off, d.name, d.regNo, d.enroll);
+  drawCert(document.getElementById('preview'), d.name, d.regNo, d.enroll);
   document.getElementById('previewLabel').style.display = 'block';
   document.getElementById('preview').scrollIntoView({behavior:'smooth', block:'center'});
   off.toBlob(function(blob){
